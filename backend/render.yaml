@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: h2s-sentinel-backend
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    envVars:
+      - key: JWT_SECRET
+        generateValue: true
+      - key: FRONTEND_URL
+        value: "*"   # update to your deployed frontend URL after first deploy
+      - key: DATABASE_URL
+        value: sqlite:///./h2s_sentinel.db
+      - key: H2S_WARNING_PPM
+        value: "10"
+      - key: H2S_DANGER_PPM
+        value: "20"
+      - key: H2S_EMERGENCY_PPM
+        value: "50"
+    healthCheckPath: /api/health

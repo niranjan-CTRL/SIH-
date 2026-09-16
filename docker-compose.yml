@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: h2s-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - h2s_db_data:/data
+      - h2s_uploads:/app/uploads
+    environment:
+      - JWT_SECRET=change-me-in-production-long-secure-string
+      - FRONTEND_URL=*
+      - H2S_WARNING_PPM=10
+      - H2S_DANGER_PPM=20
+      - H2S_EMERGENCY_PPM=50
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: h2s-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  h2s_db_data:
+  h2s_uploads:

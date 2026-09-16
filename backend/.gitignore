@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.env
+h2s_sentinel.db
+uploads/
+app/ai/calibration_data.csv
+app/ai/model.joblib
+app/ai/model_metrics.json
