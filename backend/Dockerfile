@@ -19,6 +19,9 @@ RUN mkdir -p /app/uploads
 # Copy the rest of the application
 COPY . .
 
+# Pre-generate synthetic calibration and train AI model at container build time
+RUN python -m app.ai.generate_synthetic_calibration && python -m app.ai.train_model
+
 # Set environment variables
 ENV DATABASE_URL="sqlite:////data/h2s_sentinel.db"
 ENV UPLOAD_DIR="/app/uploads"

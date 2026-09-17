@@ -19,12 +19,19 @@ app = FastAPI(
     version="0.1.0",
 )
 
+# Parse FRONTEND_URL environment variable for CORS (supports comma-separated URLs or '*')
 FRONTEND_URL = os.getenv("FRONTEND_URL", "*")
-allowed_origins = [FRONTEND_URL] if FRONTEND_URL != "*" else ["*"]
+if FRONTEND_URL.strip() == "*":
+    allowed_origins = ["*"]
+else:
+    allowed_origins = [url.strip() for url in FRONTEND_URL.split(",") if url.strip()]
+    if "http://localhost:5173" not in allowed_origins:
+        allowed_origins.append("http://localhost:5173")
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -45,10 +52,24 @@ app.include_router(reports_router.router)
 
 @app.on_event("startup")
 def on_startup():
+    # 1. Seed demo database
     try:
         seed_demo_data()
     except Exception as e:
         print(f"Warning: Could not seed demo data: {e}")
+
+    # 2. Ensure AI model exists (critical for cloud deploys like Render where model.joblib isn't in git)
+    ai_dir = os.path.join(os.path.dirname(__file__), "ai")
+    model_path = os.path.join(ai_dir, "model.joblib")
+    if not os.path.exists(model_path):
+        print("No trained model found. Generating synthetic calibration data and training model...")
+        try:
+            from app.ai import generate_synthetic_calibration, train_model
+            generate_synthetic_calibration.main()
+            train_model.main()
+            print("Model successfully generated and trained on startup.")
+        except Exception as e:
+            print(f"Warning: Model initialization failed: {e}")
 
 
 

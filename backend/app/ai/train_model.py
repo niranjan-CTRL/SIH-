@@ -5,6 +5,9 @@ Run with real data:   place a real calibration_data.csv (same columns) in
 this folder, generated from the controlled lab protocol in spec section 23,
 then run: python -m app.ai.train_model
 """
+import warnings
+warnings.filterwarnings('ignore')
+
 import os
 import json
 import csv
@@ -23,7 +26,7 @@ METRICS_PATH = os.path.join(HERE, "model_metrics.json")
 
 def rgb_to_features(r, g, b, temp_c, humidity_pct, cartridge_age_days):
     """Build the same feature vector used at inference time (color_analysis.py)."""
-    bgr = np.uint8([[[b, g, r]]])
+    bgr = np.array([[[np.clip(b, 0, 255), np.clip(g, 0, 255), np.clip(r, 0, 255)]]], dtype=np.uint8)
     hsv = cv2.cvtColor(bgr, cv2.COLOR_BGR2HSV)[0][0]
     lab = cv2.cvtColor(bgr, cv2.COLOR_BGR2LAB)[0][0]
 
@@ -94,4 +97,8 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        import traceback
+        traceback.print_exc()

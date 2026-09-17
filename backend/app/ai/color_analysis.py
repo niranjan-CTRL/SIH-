@@ -117,7 +117,7 @@ def analyze_cartridge_image(image_bytes: bytes, temp_c: float = 28.0,
     corrected_rgb = _lighting_correct(strip_rgb, reference_rgb)
     r, g, b = corrected_rgb
 
-    bgr_pixel = np.uint8([[[b, g, r]]])
+    bgr_pixel = np.array([[[np.clip(b, 0, 255), np.clip(g, 0, 255), np.clip(r, 0, 255)]]], dtype=np.uint8)
     hsv = cv2.cvtColor(bgr_pixel, cv2.COLOR_BGR2HSV)[0][0]
     lab = cv2.cvtColor(bgr_pixel, cv2.COLOR_BGR2LAB)[0][0]
 
